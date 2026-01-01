@@ -3,143 +3,68 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>AR Video Experience</title>
+    <title>MindAR Experience</title>
+    <!-- Cargando A-Frame y MindAR según las fuentes [3] -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
-        #startButton {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            font-size: 24px;
-            background-color: rgba(0,0,0,0.8);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            z-index: 1000;
-            cursor: pointer;
+        /* Estilo para el botón de inicio obligatorio */
+        #ui-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
         }
-        #playPauseButton {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 15px 30px;
-            font-size: 18px;
-            background-color: rgba(0,0,0,0.7);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            z-index: 999;
-            cursor: pointer;
-            display: none;
+        #start-btn {
+            padding: 20px 40px; font-size: 20px; cursor: pointer;
+            background: #2ecc71; color: white; border: none; border-radius: 10px;
         }
     </style>
 </head>
+
 <body>
-    <button id="startButton">TOCA PARA INICIAR LA EXPERIENCIA AR</button>
-    <button id="playPauseButton">▶ PLAY</button>
+    <!-- Pantalla de inicio para activar el audio por políticas del navegador -->
+    <div id="ui-overlay">
+        <button id="start-btn">INICIAR EXPERIENCIA CON SONIDO</button>
+    </div>
 
-    <a-scene 
-        mindar-image="imageTargetSrc: ./marker.mind; filterMinCF:0.0001; filterBeta:0.01;" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false" 
-        renderer="colorManagement: true;"
-    >
+    <!-- Escena configurada con el marcador compilado [3] -->
+    <a-scene mindar-image="imageTargetSrc: ./marker.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         <a-assets>
-            <video 
-                id="ar-video" 
-                src="./asset.mp4" 
-                loop 
-                muted 
-                preload="auto"
-                playsinline 
-                webkit-playsinline 
-                crossorigin="anonymous"
-            ></video>
-
-            <audio 
-                id="ar-audio" 
-                src="./audio.mp3" 
-                preload="auto"
-                loop
-            ></audio>
+            <!-- SE ELIMINÓ 'muted' para permitir el sonido del archivo asset [1, 2] -->
+            <video id="ar-video" src="./asset.mp4" loop playsinline crossorigin="anonymous"></video>
         </a-assets>
 
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
-            <a-video
-                id="video-plane"
-                src="#ar-video"
-                width="1.8076923076923077"
-                height="1"
-                position="0 0 0"
-                rotation="-90 0 0"
-            ></a-video>
+            <a-video src="#ar-video" width="1.8" height="1" position="0 0 0"></a-video>
         </a-entity>
     </a-scene>
 
     <script>
-        AFRAME.registerComponent('video-updater', {
-            tick: function () {
-                const videoPlane = this.el.querySelector('#video-plane');
-                if (videoPlane) {
-                    const material = videoPlane.getObject3D('mesh').material;
-                    if (material && material.map) {
-                        material.map.needsUpdate = true;
-                    }
-                }
-            }
-        });
-
-        const startButton = document.getElementById('startButton');
-        const playPauseButton = document.getElementById('playPauseButton');
+        const startBtn = document.querySelector('#start-btn');
+        const overlay = document.querySelector('#ui-overlay');
         const video = document.querySelector('#ar-video');
-        const audio = document.querySelector('#ar-audio');
         const arTarget = document.querySelector('#ar-target');
 
-        let isPlaying = false;
-
-        startButton.addEventListener('click', () => {
-            startButton.style.display = 'none';
-            playPauseButton.style.display = 'block';
-
-            // Desbloqueo en móviles
-            video.muted = true;
-            video.play().then(() => video.pause()).catch(() => {});
-            audio.play().then(() => audio.pause()).catch(() => {});
-
-            // Añadimos el componente que fuerza la actualización de la textura
-            document.querySelector('a-scene').setAttribute('video-updater', '');
+        // 1. Activar audio mediante clic del usuario
+        startBtn.addEventListener('click', () => {
+            video.play(); // El navegador ahora permite el audio
+            video.pause(); 
+            overlay.style.display = 'none';
         });
 
-        playPauseButton.addEventListener('click', () => {
-            if (isPlaying) {
-                video.pause();
-                audio.pause();
-                playPauseButton.textContent = "▶ PLAY";
-                isPlaying = false;
-            } else {
-                video.play().catch(e => console.error('Video:', e));
-                audio.play().catch(e => console.error('Audio:', e));
-                playPauseButton.textContent = "❚❚ PAUSA";
-                isPlaying = true;
-            }
-        });
-
-        // Reproduce automáticamente al detectar el marker (después del botón de inicio)
+        // 2. Control del video al detectar la imagen
         arTarget.addEventListener('targetFound', () => {
-            if (!isPlaying) {
-                video.play();
-                audio.play();
-                playPauseButton.textContent = "❚❚ PAUSA";
-                isPlaying = true;
-            }
+            // Se añade un leve retardo de 1 segundo como solicitaste
+            setTimeout(() => {
+                video.play().catch(e => console.log("Error al reproducir:", e));
+            }, 1000); 
+        });
+
+        arTarget.addEventListener('targetLost', () => {
+            video.pause();
         });
     </script>
 </body>
