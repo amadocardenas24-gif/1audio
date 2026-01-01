@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>AR Video Experience</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -15,7 +16,7 @@
             transform: translate(-50%, -50%);
             padding: 20px 40px;
             font-size: 24px;
-            background-color: #000;
+            background-color: rgba(0,0,0,0.8);
             color: white;
             border: none;
             border-radius: 10px;
@@ -25,8 +26,8 @@
     </style>
 </head>
 <body>
-    <!-- Botón para iniciar (OBLIGATORIO en móviles) -->
-    <button id="startButton">TOCA PARA INICIAR AR</button>
+    <!-- Botón obligatorio para móviles -->
+    <button id="startButton">TOCA PARA INICIAR LA EXPERIENCIA AR</button>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./marker.mind;" 
@@ -54,13 +55,14 @@
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
-            <a-plane
+            <!-- Usamos <a-video> en lugar de <a-plane> -->
+            <a-video
                 src="#ar-video"
+                width="1.8076923076923077"
+                height="1"
                 position="0 0 0"
                 rotation="-90 0 0"
-                height="1"
-                width="1.8076923076923077"
-            ></a-plane>
+            ></a-video>
         </a-entity>
     </a-scene>
 
@@ -71,28 +73,27 @@
         const arTarget = document.querySelector('#ar-target');
 
         startButton.addEventListener('click', () => {
-            // Oculta el botón
             startButton.style.display = 'none';
 
-            // Desbloquea video y audio con una reproducción silenciosa temporal
+            // Desbloqueamos video y audio (truco para móviles)
             video.muted = true;
             video.play().then(() => {
                 video.pause();
-                video.muted = false;
                 video.currentTime = 0;
-            });
+                video.muted = false;
+            }).catch(() => {});
 
             audio.play().then(() => {
                 audio.pause();
                 audio.currentTime = 0;
-            });
+            }).catch(() => {});
 
-            // Ahora activa la reproducción real al detectar el marker
+            // Al detectar el marker: reproducir todo
             arTarget.addEventListener('targetFound', () => {
                 video.currentTime = 0;
-                video.play();
+                video.play().catch(e => console.error("Video error:", e));
                 audio.currentTime = 0;
-                audio.play();
+                audio.play().catch(e => console.error("Audio error:", e));
             });
 
             arTarget.addEventListener('targetLost', () => {
