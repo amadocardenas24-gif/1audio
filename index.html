@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>AR Video Experience - Tropical AR</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -12,21 +12,28 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        body {
+        html, body {
+            width: 100%;
+            height: 100%;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            position: fixed;
+            background: #000;
         }
 
-        /* Pantalla de carga */
+        /* Pantalla de carga - FIXED para móvil */
         .loading-screen {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
+            height: -webkit-fill-available; /* Para Safari iOS */
+            height: fill-available;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
             background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 25%, #4ECDC4 50%, #1A535C 75%, #FF6B6B 100%);
             background-size: 400% 400%;
             animation: gradientBG 8s ease infinite;
@@ -36,12 +43,77 @@
             align-items: center;
             z-index: 1000;
             transition: opacity 1s ease;
+            padding: 20px;
+            overflow: hidden;
         }
 
+        /* Contenedor de contenido con scroll si es necesario */
         .loading-content {
             text-align: center;
             padding: 20px;
-            max-width: 80%;
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Ajustes para móvil */
+        @media (max-width: 768px) {
+            .loading-title {
+                font-size: 2.2rem !important;
+                margin-bottom: 15px !important;
+            }
+            
+            .loading-subtitle {
+                font-size: 1.2rem !important;
+                margin-bottom: 30px !important;
+            }
+            
+            .palm-trees {
+                width: 250px !important;
+                height: 150px !important;
+            }
+            
+            .loading-bar-container {
+                width: 90% !important;
+                max-width: 300px !important;
+                height: 25px !important;
+            }
+            
+            .loading-percentage {
+                font-size: 1.8rem !important;
+            }
+            
+            .instructions {
+                font-size: 1rem !important;
+                padding: 0 15px !important;
+                bottom: 10px !important;
+            }
+        }
+
+        @media (max-height: 700px) {
+            .loading-title {
+                font-size: 1.8rem !important;
+            }
+            
+            .palm-trees {
+                transform: scale(0.8);
+                margin: 15px auto !important;
+            }
+            
+            .loading-bar-container {
+                margin: 20px 0 !important;
+            }
+        }
+
+        /* Ajustes específicos para iPhone */
+        @supports (-webkit-touch-callout: none) {
+            .loading-screen {
+                height: 100vh;
+                height: -webkit-fill-available;
+            }
         }
 
         .loading-title {
@@ -51,6 +123,8 @@
                          -2px -2px 0 #4ECDC4;
             margin-bottom: 20px;
             animation: pulse 2s infinite;
+            word-break: break-word;
+            line-height: 1.2;
         }
 
         .loading-subtitle {
@@ -58,6 +132,7 @@
             color: #1A535C;
             margin-bottom: 40px;
             font-weight: bold;
+            line-height: 1.3;
         }
 
         /* Gráfica animada de palmeras */
@@ -66,24 +141,25 @@
             width: 300px;
             height: 200px;
             margin: 30px auto;
+            flex-shrink: 0;
         }
 
         .palm-trunk {
             position: absolute;
             bottom: 0;
-            width: 20px;
+            width: 15px;
             background: linear-gradient(to right, #8B4513, #A0522D);
-            border-radius: 10px;
+            border-radius: 7px;
         }
 
-        .trunk-1 { left: 50px; height: 120px; }
-        .trunk-2 { left: 150px; height: 150px; }
-        .trunk-3 { left: 250px; height: 100px; }
+        .trunk-1 { left: 50px; height: 100px; }
+        .trunk-2 { left: 150px; height: 130px; }
+        .trunk-3 { left: 250px; height: 90px; }
 
         .palm-leaves {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 70px;
+            height: 70px;
             background: linear-gradient(45deg, #2E8B57, #90EE90);
             border-radius: 0 50% 0 50%;
             transform-origin: bottom center;
@@ -104,6 +180,7 @@
             overflow: hidden;
             margin: 30px 0;
             border: 3px solid #1A535C;
+            flex-shrink: 0;
         }
 
         .loading-bar {
@@ -123,6 +200,7 @@
             color: #1A535C;
             margin-top: 10px;
             text-shadow: 2px 2px 0 white;
+            flex-shrink: 0;
         }
 
         /* Instrucciones */
@@ -138,10 +216,26 @@
             animation: fadeInOut 3s infinite;
         }
 
-        /* Ocultar la escena AR inicialmente */
+        /* Escena AR */
         #ar-scene {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: -webkit-fill-available;
             opacity: 0;
             transition: opacity 1s ease;
+            z-index: 999;
+        }
+
+        /* Asegurar que la escena A-Frame ocupe toda la pantalla */
+        #ar-scene a-scene {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
         }
 
         /* Animaciones */
@@ -177,6 +271,9 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
+            top: 0;
+            left: 0;
+            z-index: 1;
         }
 
         .bubble {
@@ -196,36 +293,88 @@
                 opacity: 0;
             }
         }
+
+        /* Scroll suave para contenido largo en móviles pequeños */
+        .loading-content-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 10px;
+        }
+
+        /* Mensaje de orientación para móviles */
+        .orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.5rem;
+        }
+        
+        @media (max-height: 500px) and (orientation: landscape) {
+            .orientation-warning {
+                display: flex;
+            }
+            
+            .loading-screen {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Advertencia de orientación -->
+    <div class="orientation-warning">
+        <div>
+            <h2>🌴 Por favor gira tu dispositivo 📱</h2>
+            <p>Para una mejor experiencia, usa el modo vertical (portrait)</p>
+            <div style="font-size: 3rem; margin: 20px 0;">↻</div>
+        </div>
+    </div>
+
     <!-- Pantalla de carga tropical -->
     <div class="loading-screen" id="loadingScreen">
-        <div class="loading-content">
-            <h1 class="loading-title">🌴 AR TROPICAL 🌺</h1>
-            <p class="loading-subtitle">Cargando experiencia de Realidad Aumentada</p>
-            
-            <!-- Gráfica de palmeras -->
-            <div class="palm-trees">
-                <div class="palm-trunk trunk-1"></div>
-                <div class="palm-trunk trunk-2"></div>
-                <div class="palm-trunk trunk-3"></div>
+        <div class="loading-content-container">
+            <div class="loading-content">
+                <h1 class="loading-title">🌴 AR TROPICAL 🌺</h1>
+                <p class="loading-subtitle">Cargando experiencia de Realidad Aumentada</p>
                 
-                <div class="palm-leaves leaves-1"></div>
-                <div class="palm-leaves leaves-2"></div>
-                <div class="palm-leaves leaves-3"></div>
+                <!-- Gráfica de palmeras -->
+                <div class="palm-trees">
+                    <div class="palm-trunk trunk-1"></div>
+                    <div class="palm-trunk trunk-2"></div>
+                    <div class="palm-trunk trunk-3"></div>
+                    
+                    <div class="palm-leaves leaves-1"></div>
+                    <div class="palm-leaves leaves-2"></div>
+                    <div class="palm-leaves leaves-3"></div>
+                </div>
+                
+                <!-- Barra de carga -->
+                <div class="loading-bar-container">
+                    <div class="loading-bar" id="loadingBar"></div>
+                </div>
+                
+                <!-- Porcentaje -->
+                <div class="loading-percentage" id="loadingPercentage">0%</div>
+                
+                <!-- Instrucciones -->
+                <p class="instructions">🔍 Apunta la cámara al marcador para ver el video en AR</p>
             </div>
-            
-            <!-- Barra de carga -->
-            <div class="loading-bar-container">
-                <div class="loading-bar" id="loadingBar"></div>
-            </div>
-            
-            <!-- Porcentaje -->
-            <div class="loading-percentage" id="loadingPercentage">0%</div>
-            
-            <!-- Instrucciones -->
-            <p class="instructions">🔍 Apunta la cámara al marcador para ver el video en AR</p>
         </div>
         
         <!-- Burbujas decorativas -->
@@ -234,7 +383,7 @@
 
     <!-- Escena AR (oculta inicialmente) -->
     <div id="ar-scene">
-        <a-scene mindar-image="imageTargetSrc: ./marker.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" renderer="colorManagement: true;">
+        <a-scene mindar-image="imageTargetSrc: ./marker.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" renderer="colorManagement: true; alpha: true;">
             <a-assets>
                 <video id="ar-video" src="./asset.mp4" loop muted playsinline crossorigin="anonymous"></video>
             </a-assets>
@@ -253,23 +402,42 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Ajustar altura para móviles iOS
+            function setFullHeight() {
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+                
+                // Aplicar altura completa a pantalla de carga
+                const loadingScreen = document.getElementById('loadingScreen');
+                loadingScreen.style.height = window.innerHeight + 'px';
+            }
+            
+            // Llamar al cargar y al redimensionar
+            setFullHeight();
+            window.addEventListener('resize', setFullHeight);
+            window.addEventListener('orientationchange', setFullHeight);
+            
             // Elementos DOM
             const loadingScreen = document.getElementById('loadingScreen');
             const loadingBar = document.getElementById('loadingBar');
             const loadingPercentage = document.getElementById('loadingPercentage');
             const arScene = document.getElementById('ar-scene');
             const bubblesContainer = document.getElementById('bubbles');
-            const arTarget = document.querySelector('#ar-target');
-            const video = document.querySelector('#ar-video');
             
             // Crear burbujas decorativas
             function createBubbles() {
-                for (let i = 0; i < 20; i++) {
+                // Limpiar burbujas existentes
+                bubblesContainer.innerHTML = '';
+                
+                const bubbleCount = window.innerWidth < 768 ? 15 : 25;
+                
+                for (let i = 0; i < bubbleCount; i++) {
                     const bubble = document.createElement('div');
                     bubble.className = 'bubble';
                     
-                    // Tamaño aleatorio
-                    const size = Math.random() * 60 + 20;
+                    // Tamaño proporcional al dispositivo
+                    const baseSize = window.innerWidth < 768 ? 40 : 60;
+                    const size = Math.random() * baseSize + 15;
                     bubble.style.width = `${size}px`;
                     bubble.style.height = `${size}px`;
                     
@@ -292,6 +460,12 @@
                 }
             }
             
+            // Inicializar burbujas
+            createBubbles();
+            
+            // Recrear burbujas al cambiar tamaño
+            window.addEventListener('resize', createBubbles);
+            
             // Simular progreso de carga
             let progress = 0;
             const loadingInterval = setInterval(() => {
@@ -313,30 +487,37 @@
                             arScene.style.opacity = '1';
                             
                             // Inicializar eventos AR después de mostrar la escena
-                            arTarget.addEventListener('targetFound', () => { 
-                                video.play().catch(e => console.error("Error al reproducir video", e)); 
-                            });
-                            arTarget.addEventListener('targetLost', () => { 
-                                video.pause(); 
-                            });
+                            const arTarget = document.querySelector('#ar-target');
+                            const video = document.querySelector('#ar-video');
+                            
+                            if (arTarget && video) {
+                                arTarget.addEventListener('targetFound', () => { 
+                                    video.play().catch(e => console.error("Error al reproducir video", e)); 
+                                });
+                                arTarget.addEventListener('targetLost', () => { 
+                                    video.pause(); 
+                                });
+                            }
                         }, 1000);
                     }, 800);
                 }
             }, 200);
-            
-            // Crear burbujas al inicio
-            createBubbles();
             
             // Crear más burbujas periódicamente
             setInterval(() => {
                 if (loadingScreen.style.display !== 'none') {
                     const bubble = document.createElement('div');
                     bubble.className = 'bubble';
-                    const size = Math.random() * 40 + 10;
+                    
+                    const baseSize = window.innerWidth < 768 ? 30 : 50;
+                    const size = Math.random() * baseSize + 10;
                     bubble.style.width = `${size}px`;
                     bubble.style.height = `${size}px`;
                     bubble.style.left = `${Math.random() * 100}%`;
-                    bubble.style.background = 'rgba(255, 255, 255, 0.3)';
+                    
+                    const colors = ['rgba(255, 255, 255, 0.3)', 'rgba(255, 230, 109, 0.3)'];
+                    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
                     bubblesContainer.appendChild(bubble);
                     
                     // Remover burbuja después de animación
@@ -346,7 +527,7 @@
                         }
                     }, 8000);
                 }
-            }, 1000);
+            }, 1500);
         });
     </script>
 </body>
