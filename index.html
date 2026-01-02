@@ -22,6 +22,155 @@
             background: black;
         }
 
+        /* Pantalla de autorización de cámara */
+        .camera-permission-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1A535C 0%, #4ECDC4 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            text-align: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .permission-content {
+            max-width: 95%;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .permission-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            display: block;
+            animation: pulse 2s infinite;
+        }
+
+        .permission-title {
+            font-size: 2.2rem;
+            color: white;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 #FF6B6B;
+            font-weight: bold;
+        }
+
+        .permission-description {
+            color: white;
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            line-height: 1.5;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .permission-btn {
+            background: linear-gradient(135deg, #FF6B6B, #FFE66D);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 10px;
+            min-width: 250px;
+        }
+
+        .permission-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .permission-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .permission-btn .btn-icon {
+            font-size: 1.8rem;
+        }
+
+        .permission-btn.deny {
+            background: linear-gradient(135deg, #666, #999);
+            opacity: 0.8;
+        }
+
+        .permission-warning {
+            color: #FFE66D;
+            font-size: 0.9rem;
+            margin-top: 30px;
+            padding: 10px;
+            border: 2px dashed #FFE66D;
+            border-radius: 10px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .permission-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+            text-align: left;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 400px;
+        }
+
+        .permission-step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+        }
+
+        .step-icon {
+            font-size: 1.5rem;
+            min-width: 40px;
+            height: 40px;
+            background: rgba(255, 107, 107, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .step-text {
+            font-size: 1rem;
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
         /* Ocultar TODOS los elementos de UI de A-Frame */
         .a-enter-vr, 
         .a-enter-ar,
@@ -312,6 +461,20 @@
 
         /* Responsive */
         @media (max-width: 768px) {
+            .permission-title {
+                font-size: 1.8rem;
+            }
+            
+            .permission-description {
+                font-size: 1rem;
+            }
+            
+            .permission-btn {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+                min-width: 200px;
+            }
+            
             .sound-btn {
                 width: 70px;
                 height: 70px;
@@ -347,10 +510,68 @@
             .instruction-icon {
                 font-size: 2.5rem;
             }
+            
+            .permission-icon {
+                font-size: 3.5rem;
+                margin-bottom: 15px;
+            }
+            
+            .permission-title {
+                font-size: 1.8rem;
+                margin-bottom: 15px;
+            }
+            
+            .permission-description {
+                font-size: 1rem;
+                margin-bottom: 25px;
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Pantalla de autorización de cámara -->
+    <div class="camera-permission-screen" id="cameraPermissionScreen">
+        <div class="permission-content">
+            <div class="permission-icon">📸</div>
+            <h1 class="permission-title">¡Hola! 🌴</h1>
+            
+            <div class="permission-description">
+                Para disfrutar de esta experiencia de Realidad Aumentada, necesitamos acceder a tu cámara. 
+                Esto nos permitirá mostrar contenido AR cuando apuntes a marcadores especiales.
+            </div>
+            
+            <div class="permission-steps">
+                <div class="permission-step">
+                    <div class="step-icon">1️⃣</div>
+                    <div class="step-text">Permite el acceso a la cámara cuando tu navegador lo solicite</div>
+                </div>
+                <div class="permission-step">
+                    <div class="step-icon">2️⃣</div>
+                    <div class="step-text">Apunta tu cámara al marcador especial</div>
+                </div>
+                <div class="permission-step">
+                    <div class="step-icon">3️⃣</div>
+                    <div class="step-text">¡Disfruta del video en realidad aumentada!</div>
+                </div>
+            </div>
+            
+            <button class="permission-btn" id="allowCameraBtn">
+                <span class="btn-icon">✅</span>
+                Permitir Cámara
+            </button>
+            
+            <button class="permission-btn deny" id="denyCameraBtn">
+                <span class="btn-icon">❌</span>
+                No Permitir
+            </button>
+            
+            <div class="permission-warning">
+                ℹ️ La cámara solo se usa para la experiencia AR. No grabamos ni almacenamos ningún video.
+            </div>
+        </div>
+    </div>
+
     <!-- Pantalla de carga -->
     <div class="loading-screen" id="loadingScreen">
         <div class="loading-content">
@@ -400,6 +621,97 @@
     </div>
 
     <script>
+        // Estados de permisos
+        let cameraPermissionGranted = false;
+        let cameraStream = null;
+        
+        // Elementos DOM
+        const cameraPermissionScreen = document.getElementById('cameraPermissionScreen');
+        const loadingScreen = document.getElementById('loadingScreen');
+        const allowCameraBtn = document.getElementById('allowCameraBtn');
+        const denyCameraBtn = document.getElementById('denyCameraBtn');
+        
+        // Función para solicitar permiso de cámara
+        async function requestCameraPermission() {
+            try {
+                console.log('Solicitando permiso de cámara...');
+                
+                // Intentar acceder a la cámara
+                cameraStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment', // Preferir cámara trasera
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    },
+                    audio: false 
+                });
+                
+                // Si llegamos aquí, el permiso fue concedido
+                cameraPermissionGranted = true;
+                console.log('Permiso de cámara concedido');
+                
+                // Detener el stream inmediatamente (solo necesitamos el permiso)
+                cameraStream.getTracks().forEach(track => track.stop());
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Error al acceder a la cámara:', error);
+                
+                // Mostrar mensaje de error específico
+                let errorMessage = 'No se pudo acceder a la cámara. ';
+                
+                if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+                    errorMessage += 'El permiso fue denegado. Por favor, permite el acceso a la cámara en la configuración de tu navegador.';
+                } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+                    errorMessage += 'No se encontró ninguna cámara.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMessage += 'Tu navegador no soporta acceso a la cámara.';
+                } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+                    errorMessage += 'La cámara está siendo usada por otra aplicación.';
+                } else {
+                    errorMessage += 'Error desconocido: ' + error.message;
+                }
+                
+                alert(errorMessage);
+                return false;
+            }
+        }
+        
+        // Función para verificar si ya tenemos permisos
+        async function checkExistingCameraPermission() {
+            try {
+                // Esta API es experimental pero útil
+                if (navigator.permissions && navigator.permissions.query) {
+                    const permission = await navigator.permissions.query({ name: 'camera' });
+                    return permission.state === 'granted';
+                }
+                return false;
+            } catch (error) {
+                console.log('No se pudo verificar permiso existente:', error);
+                return false;
+            }
+        }
+        
+        // Función para ocultar pantalla de permisos y mostrar carga
+        function proceedToAR() {
+            // Ocultar pantalla de permisos con animación
+            cameraPermissionScreen.style.opacity = '0';
+            
+            setTimeout(() => {
+                cameraPermissionScreen.style.display = 'none';
+                
+                // Mostrar pantalla de carga
+                loadingScreen.style.display = 'flex';
+                
+                // RETARDO antes de iniciar la carga
+                setTimeout(() => {
+                    simulateLoading();
+                }, 300);
+                
+            }, 500);
+        }
+        
         // Función para simular carga con retardo
         function simulateLoading() {
             const loadingBar = document.getElementById('loadingBar');
@@ -635,22 +947,94 @@
             }, 100);
         }
         
-        // Iniciar cuando la página cargue
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('Iniciando carga con retardo...');
+        // Event Listeners para los botones de permiso
+        allowCameraBtn.addEventListener('click', async () => {
+            // Cambiar texto del botón para indicar procesamiento
+            allowCameraBtn.innerHTML = '<span class="btn-icon">⏳</span> Solicitando...';
+            allowCameraBtn.disabled = true;
             
-            // Pequeño delay inicial
-            setTimeout(() => {
-                simulateLoading();
-            }, 500);
+            // Solicitar permiso
+            const permissionGranted = await requestCameraPermission();
+            
+            if (permissionGranted) {
+                // Proceder a la experiencia AR
+                proceedToAR();
+            } else {
+                // Restaurar botón
+                allowCameraBtn.innerHTML = '<span class="btn-icon">✅</span> Permitir Cámara';
+                allowCameraBtn.disabled = false;
+                
+                // Mostrar opción para reintentar
+                alert('No se pudo acceder a la cámara. Por favor, verifica los permisos e intenta de nuevo.');
+            }
         });
         
-        // Manejar redimensionamiento
-        window.addEventListener('resize', () => {
-            const loadingScreen = document.getElementById('loadingScreen');
-            if (loadingScreen) {
-                loadingScreen.style.height = window.innerHeight + 'px';
+        denyCameraBtn.addEventListener('click', () => {
+            // Mostrar mensaje y opciones
+            const userConfirmed = confirm('Sin acceso a la cámara, no podrás disfrutar de la experiencia AR. ¿Estás seguro de que deseas continuar?');
+            
+            if (userConfirmed) {
+                // Puedes decidir qué hacer aquí
+                // Opción 1: Salir de la aplicación
+                // window.close(); // No funciona en todos los navegadores
+                
+                // Opción 2: Mostrar un mensaje estático
+                cameraPermissionScreen.innerHTML = `
+                    <div class="permission-content">
+                        <div class="permission-icon">😔</div>
+                        <h1 class="permission-title">Experiencia Limitada</h1>
+                        <div class="permission-description">
+                            La experiencia de Realidad Aumentada requiere acceso a la cámara.
+                            <br><br>
+                            Puedes regresar y permitir el acceso cuando quieras.
+                        </div>
+                        <button class="permission-btn" id="retryPermissionBtn">
+                            <span class="btn-icon">🔄</span>
+                            Intentar de Nuevo
+                        </button>
+                    </div>
+                `;
+                
+                // Agregar event listener al nuevo botón
+                setTimeout(() => {
+                    document.getElementById('retryPermissionBtn').addEventListener('click', () => {
+                        location.reload();
+                    });
+                }, 100);
             }
+        });
+        
+        // Inicializar cuando la página cargue
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('Página cargada, verificando permisos...');
+            
+            // Verificar si ya tenemos permisos
+            const hasExistingPermission = await checkExistingCameraPermission();
+            
+            if (hasExistingPermission) {
+                console.log('Ya tiene permisos de cámara, procediendo directamente...');
+                // Ocultar pantalla de permisos y proceder directamente
+                cameraPermissionScreen.style.display = 'none';
+                loadingScreen.style.display = 'flex';
+                
+                // RETARDO antes de iniciar la carga
+                setTimeout(() => {
+                    simulateLoading();
+                }, 1000);
+            } else {
+                // Mostrar pantalla de permisos (ya está visible por defecto)
+                console.log('Mostrando pantalla de permisos...');
+            }
+            
+            // Manejar redimensionamiento
+            window.addEventListener('resize', () => {
+                const elements = [cameraPermissionScreen, loadingScreen];
+                elements.forEach(element => {
+                    if (element) {
+                        element.style.height = window.innerHeight + 'px';
+                    }
+                });
+            });
         });
     </script>
 </body>
