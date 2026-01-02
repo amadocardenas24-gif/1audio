@@ -2,180 +2,352 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Foz 3 Países AR - Personalizable</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Video Experience - Tropical AR</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    
     <style>
-        /* Selector de colores */
-        .color-picker {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+
+        body {
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* Pantalla de carga */
+        .loading-screen {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1001;
-            background: rgba(255,255,255,0.9);
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .color-options {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        
-        .color-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid white;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .color-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Pantalla de inicio BASE */
-        .country-selector {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            /* COLOR INICIAL - Puedes cambiarlo */
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #FF6B6B 0%, #FFE66D 25%, #4ECDC4 50%, #1A535C 75%, #FF6B6B 100%);
+            background-size: 400% 400%;
+            animation: gradientBG 8s ease infinite;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: background 0.5s ease;
+            z-index: 1000;
+            transition: opacity 1s ease;
         }
-        
-        h1 {
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-        
-        .subtitle {
-            color: white;
-            font-size: 1.2em;
-            opacity: 0.9;
-            margin-bottom: 40px;
+
+        .loading-content {
             text-align: center;
-            max-width: 600px;
+            padding: 20px;
+            max-width: 80%;
         }
-        
-        .flag-buttons {
-            display: flex;
-            gap: 20px;
-            margin: 30px;
+
+        .loading-title {
+            font-size: 3rem;
+            color: white;
+            text-shadow: 3px 3px 0 #1A535C,
+                         -2px -2px 0 #4ECDC4;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
         }
-        
-        .flag-btn {
-            padding: 20px 40px;
-            font-size: 1.5em;
-            border: none;
+
+        .loading-subtitle {
+            font-size: 1.5rem;
+            color: #1A535C;
+            margin-bottom: 40px;
+            font-weight: bold;
+        }
+
+        /* Gráfica animada de palmeras */
+        .palm-trees {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            margin: 30px auto;
+        }
+
+        .palm-trunk {
+            position: absolute;
+            bottom: 0;
+            width: 20px;
+            background: linear-gradient(to right, #8B4513, #A0522D);
             border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
         }
-        
-        #btn-arg { background: #74ACDF; color: white; }
-        #btn-bra { background: #FAD221; color: #3E9B4F; }
-        #btn-pry { background: #2D936C; color: white; }
-        
-        .flag-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+
+        .trunk-1 { left: 50px; height: 120px; }
+        .trunk-2 { left: 150px; height: 150px; }
+        .trunk-3 { left: 250px; height: 100px; }
+
+        .palm-leaves {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(45deg, #2E8B57, #90EE90);
+            border-radius: 0 50% 0 50%;
+            transform-origin: bottom center;
+            animation: sway 3s infinite ease-in-out;
+        }
+
+        .leaves-1 { left: 10px; top: 20px; animation-delay: 0s; }
+        .leaves-2 { left: 110px; top: 0; animation-delay: 0.5s; }
+        .leaves-3 { left: 210px; top: 40px; animation-delay: 1s; }
+
+        /* Barra de carga */
+        .loading-bar-container {
+            width: 80%;
+            max-width: 400px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 30px 0;
+            border: 3px solid #1A535C;
+        }
+
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #FF6B6B, #FFE66D, #4ECDC4, #1A535C);
+            background-size: 300% 100%;
+            animation: gradientBar 2s infinite linear;
+            border-radius: 12px;
+            transition: width 0.3s ease;
+        }
+
+        /* Porcentaje de carga */
+        .loading-percentage {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1A535C;
+            margin-top: 10px;
+            text-shadow: 2px 2px 0 white;
+        }
+
+        /* Instrucciones */
+        .instructions {
+            position: absolute;
+            bottom: 20px;
+            color: white;
+            text-align: center;
+            width: 100%;
+            padding: 0 20px;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px #1A535C;
+            animation: fadeInOut 3s infinite;
+        }
+
+        /* Ocultar la escena AR inicialmente */
+        #ar-scene {
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        /* Animaciones */
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes sway {
+            0%, 100% { transform: rotate(-5deg); }
+            50% { transform: rotate(5deg); }
+        }
+
+        @keyframes gradientBar {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 300% 50%; }
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Animación de burbujas */
+        .bubbles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .bubble {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: floatUp 8s infinite ease-in;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Selector de colores -->
-    <div class="color-picker">
-        <strong>🎨 Personalizar fondo:</strong>
-        <div class="color-options">
-            <div class="color-btn" style="background: linear-gradient(135deg, #1a2980, #26d0ce);" 
-                 onclick="cambiarFondo('gradiente-azul')"></div>
-            <div class="color-btn" style="background: linear-gradient(135deg, #FF416C, #FF4B2B);" 
-                 onclick="cambiarFondo('gradiente-rojo')"></div>
-            <div class="color-btn" style="background: linear-gradient(135deg, #8E2DE2, #4A00E0);" 
-                 onclick="cambiarFondo('gradiente-purpura')"></div>
-            <div class="color-btn" style="background: linear-gradient(135deg, #00b09b, #96c93d);" 
-                 onclick="cambiarFondo('gradiente-verde')"></div>
-            <div class="color-btn" style="background: linear-gradient(135deg, #f46b45, #eea849);" 
-                 onclick="cambiarFondo('gradiente-naranja')"></div>
-            <div class="color-btn" style="background: linear-gradient(135deg, #0F2027, #203A43, #2C5364);" 
-                 onclick="cambiarFondo('gradiente-noche')"></div>
+    <!-- Pantalla de carga tropical -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-content">
+            <h1 class="loading-title">🌴 AR TROPICAL 🌺</h1>
+            <p class="loading-subtitle">Cargando experiencia de Realidad Aumentada</p>
+            
+            <!-- Gráfica de palmeras -->
+            <div class="palm-trees">
+                <div class="palm-trunk trunk-1"></div>
+                <div class="palm-trunk trunk-2"></div>
+                <div class="palm-trunk trunk-3"></div>
+                
+                <div class="palm-leaves leaves-1"></div>
+                <div class="palm-leaves leaves-2"></div>
+                <div class="palm-leaves leaves-3"></div>
+            </div>
+            
+            <!-- Barra de carga -->
+            <div class="loading-bar-container">
+                <div class="loading-bar" id="loadingBar"></div>
+            </div>
+            
+            <!-- Porcentaje -->
+            <div class="loading-percentage" id="loadingPercentage">0%</div>
+            
+            <!-- Instrucciones -->
+            <p class="instructions">🔍 Apunta la cámara al marcador para ver el video en AR</p>
         </div>
+        
+        <!-- Burbujas decorativas -->
+        <div class="bubbles" id="bubbles"></div>
     </div>
 
-    <!-- Pantalla de inicio -->
-    <div class="country-selector" id="countrySelector">
-        <h1>FOZ DO IGUAÇU - 3 PAÍSES</h1>
-        <p class="subtitle">Selecciona tu país para la experiencia AR</p>
-        
-        <div class="flag-buttons">
-            <button class="flag-btn" id="btn-arg">🇦🇷 ARGENTINA</button>
-            <button class="flag-btn" id="btn-bra">🇧🇷 BRASIL</button>
-            <button class="flag-btn" id="btn-pry">🇵🇾 PARAGUAY</button>
-        </div>
-        
-        <p style="color: rgba(255,255,255,0.7); margin-top: 40px; font-size: 0.9em;">
-            💡 Personaliza los colores con el selector arriba a la derecha
-        </p>
+    <!-- Escena AR (oculta inicialmente) -->
+    <div id="ar-scene">
+        <a-scene mindar-image="imageTargetSrc: ./marker.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" renderer="colorManagement: true;">
+            <a-assets>
+                <video id="ar-video" src="./asset.mp4" loop muted playsinline crossorigin="anonymous"></video>
+            </a-assets>
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            <a-entity id="ar-target" mindar-image-target="targetIndex: 0">
+                <a-plane
+                    src="#ar-video"
+                    position="0 0 0"
+                    rotation="0 0 0"
+                    height="1"
+                    width="1.8076923076923077"
+                ></a-plane>
+            </a-entity>
+        </a-scene>
     </div>
-
-    <!-- Escena AR (igual que antes) -->
-    <a-scene mindar-image="imageTargetSrc: ./foz-3-paises.mind;" 
-             vr-mode-ui="enabled: false"
-             id="arScene"
-             style="display: none;">
-        <!-- ... tu contenido AR aquí ... -->
-    </a-scene>
 
     <script>
-        // Función para cambiar colores
-        function cambiarFondo(tema) {
-            const selector = document.getElementById('countrySelector');
-            const colores = {
-                'gradiente-azul': 'linear-gradient(135deg, #1a2980, #26d0ce)',
-                'gradiente-rojo': 'linear-gradient(135deg, #FF416C, #FF4B2B)',
-                'gradiente-purpura': 'linear-gradient(135deg, #8E2DE2, #4A00E0)',
-                'gradiente-verde': 'linear-gradient(135deg, #00b09b, #96c93d)',
-                'gradiente-naranja': 'linear-gradient(135deg, #f46b45, #eea849)',
-                'gradiente-noche': 'linear-gradient(135deg, #0F2027, #203A43, #2C5364)'
-            };
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elementos DOM
+            const loadingScreen = document.getElementById('loadingScreen');
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingPercentage = document.getElementById('loadingPercentage');
+            const arScene = document.getElementById('ar-scene');
+            const bubblesContainer = document.getElementById('bubbles');
+            const arTarget = document.querySelector('#ar-target');
+            const video = document.querySelector('#ar-video');
             
-            selector.style.background = colores[tema];
-            
-            // Guardar preferencia
-            localStorage.setItem('tema-foz', tema);
-        }
-        
-        // Cargar tema guardado
-        document.addEventListener('DOMContentLoaded', () => {
-            const temaGuardado = localStorage.getItem('tema-foz');
-            if (temaGuardado) {
-                cambiarFondo(temaGuardado);
+            // Crear burbujas decorativas
+            function createBubbles() {
+                for (let i = 0; i < 20; i++) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    
+                    // Tamaño aleatorio
+                    const size = Math.random() * 60 + 20;
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    
+                    // Posición aleatoria
+                    bubble.style.left = `${Math.random() * 100}%`;
+                    
+                    // Retraso de animación aleatorio
+                    bubble.style.animationDelay = `${Math.random() * 5}s`;
+                    
+                    // Color aleatorio de la paleta tropical
+                    const colors = [
+                        'rgba(255, 107, 107, 0.4)',
+                        'rgba(255, 230, 109, 0.4)',
+                        'rgba(78, 205, 196, 0.4)',
+                        'rgba(26, 83, 92, 0.4)'
+                    ];
+                    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    bubblesContainer.appendChild(bubble);
+                }
             }
-        });
-        
-        // Control de países (igual que antes)
-        document.getElementById('btn-arg').onclick = () => startAR('argentina');
-        document.getElementById('btn-bra').onclick = () => startAR('brasil');
-        document.getElementById('btn-pry').onclick = () => startAR('paraguay');
-        
-        function startAR(pais) {
-            document.getElementById('countrySelector').style.display = 'none';
-            document.getElementById('arScene').style.display = 'block';
             
-            // Tu lógica AR aquí...
-        }
+            // Simular progreso de carga
+            let progress = 0;
+            const loadingInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 100) progress = 100;
+                
+                loadingBar.style.width = `${progress}%`;
+                loadingPercentage.textContent = `${Math.round(progress)}%`;
+                
+                if (progress >= 100) {
+                    clearInterval(loadingInterval);
+                    
+                    // Esperar un momento y luego ocultar pantalla de carga
+                    setTimeout(() => {
+                        loadingScreen.style.opacity = '0';
+                        
+                        setTimeout(() => {
+                            loadingScreen.style.display = 'none';
+                            arScene.style.opacity = '1';
+                            
+                            // Inicializar eventos AR después de mostrar la escena
+                            arTarget.addEventListener('targetFound', () => { 
+                                video.play().catch(e => console.error("Error al reproducir video", e)); 
+                            });
+                            arTarget.addEventListener('targetLost', () => { 
+                                video.pause(); 
+                            });
+                        }, 1000);
+                    }, 800);
+                }
+            }, 200);
+            
+            // Crear burbujas al inicio
+            createBubbles();
+            
+            // Crear más burbujas periódicamente
+            setInterval(() => {
+                if (loadingScreen.style.display !== 'none') {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    const size = Math.random() * 40 + 10;
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.left = `${Math.random() * 100}%`;
+                    bubble.style.background = 'rgba(255, 255, 255, 0.3)';
+                    bubblesContainer.appendChild(bubble);
+                    
+                    // Remover burbuja después de animación
+                    setTimeout(() => {
+                        if (bubble.parentNode) {
+                            bubble.parentNode.removeChild(bubble);
+                        }
+                    }, 8000);
+                }
+            }, 1000);
+        });
     </script>
 </body>
 </html>
